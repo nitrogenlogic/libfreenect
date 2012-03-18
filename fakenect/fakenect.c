@@ -31,6 +31,9 @@
 #include <unistd.h>
 #include <time.h>
 #include <assert.h>
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 #define GRAVITY 9.80665
 
@@ -54,19 +57,41 @@ static void *user_ptr = NULL;
 
 static void sleep_highres(double tm)
 {
+#ifdef _WIN32
+	int msec = floor(tm * 1000);
+	if (msec > 0) {
+		Sleep(msec);
+	}
+#else
 	int sec = floor(tm);
 	int usec = (tm - sec) * 1000000;
 	if (tm > 0) {
 		sleep(sec);
 		usleep(usec);
 	}
+#endif
 }
 
 static double get_time()
 {
+#ifdef _WIN32
+	SYSTEMTIME st;
+	GetSystemTime(&st);
+	FILETIME ft;
+	SystemTimeToFileTime(&st, &ft);
+	ULARGE_INTEGER li;
+	li.LowPart = ft.dwLowDateTime;
+	li.HighPart = ft.dwHighDateTime;
+	// FILETIME is given as a 64-bit value for the number of 100-nanosecond
+	// intervals that have passed since Jan 1, 1601 (UTC).  The difference between that
+	// epoch and the POSIX epoch (Jan 1, 1970) is 116444736000000000 such ticks.
+	uint64_t total_usecs = (li.QuadPart - 116444736000000000L) / 10L;
+	return (total_usecs / 1000000.);
+#else
 	struct timeval cur;
 	gettimeofday(&cur, NULL);
 	return cur.tv_sec + cur.tv_usec / 1000000.;
+#endif
 }
 
 static char *one_line(FILE *fp)
@@ -107,7 +132,7 @@ static int parse_line(char *type, double *cur_time, unsigned int *timestamp, uns
 	char *file_path = malloc(file_path_size);
 	snprintf(file_path, file_path_size, "%s/%s", input_path, line);
 	// Open file
-	FILE *cur_fp = fopen(file_path, "r");
+	FILE *cur_fp = fopen(file_path, "rb");
 	if (!cur_fp) {
 		printf("Error: Cannot open file [%s]\n", file_path);
 		exit(1);
@@ -136,7 +161,7 @@ static void open_index()
 	int index_path_size = strlen(input_path) + 50;
 	char *index_path = malloc(index_path_size);
 	snprintf(index_path, index_path_size, "%s/INDEX.txt", input_path);
-	index_fp = fopen(index_path, "r");
+	index_fp = fopen(index_path, "rb");
 	if (!index_fp) {
 		printf("Error: Cannot open file [%s]\n", index_path);
 		exit(1);
@@ -184,7 +209,7 @@ int freenect_process_events(freenect_context *ctx)
 			if (cur_depth_cb && depth_running) {
 				void *cur_depth = skip_line(data);
 				if (depth_buffer) {
-					memcpy(depth_buffer, cur_depth, FREENECT_DEPTH_11BIT_SIZE);
+					memcpy(depth_buffer, cur_depth, freenect_find_depth_mode(FREENECT_RESOLUTION_MEDIUM, FREENECT_DEPTH_11BIT).bytes);
 					cur_depth = depth_buffer;
 				}
 				cur_depth_cb(fake_dev, cur_depth, timestamp);
@@ -194,7 +219,7 @@ int freenect_process_events(freenect_context *ctx)
 			if (cur_rgb_cb && rgb_running) {
 				void *cur_rgb = skip_line(data);
 				if (rgb_buffer) {
-					memcpy(rgb_buffer, cur_rgb, FREENECT_VIDEO_RGB_SIZE);
+					memcpy(rgb_buffer, cur_rgb, freenect_find_video_mode(FREENECT_RESOLUTION_MEDIUM, FREENECT_VIDEO_RGB).bytes);
 					cur_rgb = rgb_buffer;
 				}
 				cur_rgb_cb(fake_dev, cur_rgb, timestamp);
@@ -250,6 +275,38 @@ void freenect_set_video_callback(freenect_device *dev, freenect_video_cb cb)
 	cur_rgb_cb = cb;
 }
 
+int freenect_set_video_mode(freenect_device* dev, const freenect_frame_mode mode)
+{
+        // Always say it was successful but continue to pass through the
+        // underlying data.  Would be better to check for conflict.
+        return 0;
+}
+
+int freenect_set_depth_mode(freenect_device* dev, const freenect_frame_mode mode)
+{
+        // Always say it was successful but continue to pass through the
+        // underlying data.  Would be better to check for conflict.
+        return 0;
+}
+
+freenect_frame_mode freenect_find_video_mode(freenect_resolution res, freenect_video_format fmt) {
+    assert(FREENECT_RESOLUTION_MEDIUM == res);
+    assert(FREENECT_VIDEO_RGB == fmt);
+    // NOTE: This will leave uninitialized values if new fields are added.
+    // To update this line run the "record" program, look at the top output
+    freenect_frame_mode out = {256, 1, {0}, 921600, 640, 480, 24, 0, 30, 1};
+    return out;
+}
+
+freenect_frame_mode freenect_find_depth_mode(freenect_resolution res, freenect_depth_format fmt) {
+    assert(FREENECT_RESOLUTION_MEDIUM == res);
+    assert(FREENECT_DEPTH_11BIT == fmt);
+    // NOTE: This will leave uninitialized values if new fields are added.
+    // To update this line run the "record" program, look at the top output
+    freenect_frame_mode out = {256, 1, {0}, 614400, 640, 480, 11, 5, 30, 1};
+    return out;
+}
+
 int freenect_num_devices(freenect_context *ctx)
 {
 	// Always 1 device
@@ -267,6 +324,11 @@ int freenect_init(freenect_context **ctx, freenect_usb_context *usb_ctx)
 {
 	*ctx = fake_ctx;
 	return 0;
+}
+
+void freenect_select_subdevices(freenect_context *ctx, freenect_device_flags subdevs) {
+	// Ideally, we'd actually check for MOTOR and CAMERA and AUDIO, but for now
+	// we just ignore them and provide all captured data.
 }
 
 int freenect_set_depth_buffer(freenect_device *dev, void *buf)
