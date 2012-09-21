@@ -5,14 +5,14 @@ NCPUS=$(grep -i 'processor.*:' /proc/cpuinfo | wc -l)
 case "$1" in
 	neon)
 	TOOLCHAIN=${HOME}/devel/crosscompile/cmake-toolchain-arm-linux-neon.cmake
-	PREFIX=${HOME}/devel/crosscompile/cross-root-arm-neon/usr/local
+	PREFIX=${HOME}/devel/crosscompile/cross-root-arm-neon-depth/usr/local
 	LIBS_PREFIX=${HOME}/devel/crosscompile/cross-libs-arm-neon/usr/local
 	ARCH=armv7l
 	;;
 
 	nofp)
 	TOOLCHAIN=${HOME}/devel/crosscompile/cmake-toolchain-arm-linux-nofp.cmake
-	PREFIX=${HOME}/devel/crosscompile/cross-root-arm-nofp/usr/local
+	PREFIX=${HOME}/devel/crosscompile/cross-root-arm-nofp-depth/usr/local
 	LIBS_PREFIX=${HOME}/devel/crosscompile/cross-libs-arm-nofp/usr/local
 	ARCH=armv5tel
 	;;
