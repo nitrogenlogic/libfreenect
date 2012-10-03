@@ -37,31 +37,37 @@
 #define RESERVED_TO_RESOLUTION(reserved) (freenect_resolution)((reserved >> 8) & 0xff)
 #define RESERVED_TO_FORMAT(reserved) ((reserved) & 0xff)
 
-#define video_mode_count 12
-static freenect_frame_mode supported_video_modes[video_mode_count] = {
+static freenect_frame_mode supported_video_modes[] = {
 	// reserved, resolution, format, bytes, width, height, data_bits_per_pixel, padding_bits_per_pixel, framerate, is_valid
 	{MAKE_RESERVED(FREENECT_RESOLUTION_HIGH,   FREENECT_VIDEO_RGB), FREENECT_RESOLUTION_HIGH, {FREENECT_VIDEO_RGB}, 1280*1024*3, 1280, 1024, 24, 0, 10, 1 },
 	{MAKE_RESERVED(FREENECT_RESOLUTION_MEDIUM, FREENECT_VIDEO_RGB), FREENECT_RESOLUTION_MEDIUM, {FREENECT_VIDEO_RGB}, 640*480*3, 640,  480, 24, 0, 30, 1 },
+	{MAKE_RESERVED(FREENECT_RESOLUTION_LOW, FREENECT_VIDEO_RGB), FREENECT_RESOLUTION_LOW, {FREENECT_VIDEO_RGB}, 320*240*3, 320,  240, 24, 0, 30, 1 },
 
 	{MAKE_RESERVED(FREENECT_RESOLUTION_HIGH,   FREENECT_VIDEO_BAYER), FREENECT_RESOLUTION_HIGH, {FREENECT_VIDEO_BAYER}, 1280*1024, 1280, 1024, 8, 0, 10, 1 },
 	{MAKE_RESERVED(FREENECT_RESOLUTION_MEDIUM, FREENECT_VIDEO_BAYER), FREENECT_RESOLUTION_MEDIUM, {FREENECT_VIDEO_BAYER}, 640*480, 640, 480, 8, 0, 30, 1 },
+	{MAKE_RESERVED(FREENECT_RESOLUTION_LOW, FREENECT_VIDEO_BAYER), FREENECT_RESOLUTION_LOW, {FREENECT_VIDEO_BAYER}, 320*240, 320, 240, 8, 0, 30, 1 },
 
 	{MAKE_RESERVED(FREENECT_RESOLUTION_HIGH,   FREENECT_VIDEO_IR_8BIT), FREENECT_RESOLUTION_HIGH, {FREENECT_VIDEO_IR_8BIT}, 1280*1024, 1280, 1024, 8, 0, 10, 1 },
 	{MAKE_RESERVED(FREENECT_RESOLUTION_MEDIUM, FREENECT_VIDEO_IR_8BIT), FREENECT_RESOLUTION_MEDIUM, {FREENECT_VIDEO_IR_8BIT}, 640*488, 640, 488, 8, 0, 30, 1 },
+	{MAKE_RESERVED(FREENECT_RESOLUTION_LOW, FREENECT_VIDEO_IR_8BIT), FREENECT_RESOLUTION_LOW, {FREENECT_VIDEO_IR_8BIT}, 320*244, 320, 244, 8, 0, 30, 1 },
 
 	{MAKE_RESERVED(FREENECT_RESOLUTION_HIGH,   FREENECT_VIDEO_IR_10BIT), FREENECT_RESOLUTION_HIGH, {FREENECT_VIDEO_IR_10BIT}, 1280*1024*2, 1280, 1024, 10, 6, 10, 1 },
 	{MAKE_RESERVED(FREENECT_RESOLUTION_MEDIUM, FREENECT_VIDEO_IR_10BIT), FREENECT_RESOLUTION_MEDIUM, {FREENECT_VIDEO_IR_10BIT}, 640*488*2, 640, 488, 10, 6, 30, 1 },
+	{MAKE_RESERVED(FREENECT_RESOLUTION_LOW, FREENECT_VIDEO_IR_10BIT), FREENECT_RESOLUTION_LOW, {FREENECT_VIDEO_IR_10BIT}, 320*244*2, 320, 244, 10, 6, 30, 1 },
 
 	{MAKE_RESERVED(FREENECT_RESOLUTION_HIGH,   FREENECT_VIDEO_IR_10BIT_PACKED), FREENECT_RESOLUTION_HIGH, {FREENECT_VIDEO_IR_10BIT_PACKED}, 1280*1024*10/8, 1280, 1024, 10, 0, 10, 1 },
 	{MAKE_RESERVED(FREENECT_RESOLUTION_MEDIUM, FREENECT_VIDEO_IR_10BIT_PACKED), FREENECT_RESOLUTION_MEDIUM, {FREENECT_VIDEO_IR_10BIT_PACKED}, 640*488*10/8, 640, 488, 10, 0, 30, 1 },
+	{MAKE_RESERVED(FREENECT_RESOLUTION_LOW, FREENECT_VIDEO_IR_10BIT_PACKED), FREENECT_RESOLUTION_LOW, {FREENECT_VIDEO_IR_10BIT_PACKED}, 320*244*10/8, 320, 244, 10, 0, 30, 1 },
 
 	{MAKE_RESERVED(FREENECT_RESOLUTION_MEDIUM, FREENECT_VIDEO_YUV_RGB), FREENECT_RESOLUTION_MEDIUM, {FREENECT_VIDEO_YUV_RGB}, 640*480*3, 640, 480, 24, 0, 15, 1 },
+	{MAKE_RESERVED(FREENECT_RESOLUTION_LOW, FREENECT_VIDEO_YUV_RGB), FREENECT_RESOLUTION_LOW, {FREENECT_VIDEO_YUV_RGB}, 320*240*3, 320, 240, 24, 0, 15, 1 },
 
 	{MAKE_RESERVED(FREENECT_RESOLUTION_MEDIUM, FREENECT_VIDEO_YUV_RAW), FREENECT_RESOLUTION_MEDIUM, {FREENECT_VIDEO_YUV_RAW}, 640*480*2, 640, 480, 16, 0, 15, 1 },
+	{MAKE_RESERVED(FREENECT_RESOLUTION_LOW, FREENECT_VIDEO_YUV_RAW), FREENECT_RESOLUTION_LOW, {FREENECT_VIDEO_YUV_RAW}, 320*240*2, 320, 240, 16, 0, 15, 1 },
 };
+#define video_mode_count (sizeof(supported_video_modes) / sizeof(supported_video_modes[0]))
 
-#define depth_mode_count 6
-static freenect_frame_mode supported_depth_modes[depth_mode_count] = {
+static freenect_frame_mode supported_depth_modes[] = {
 	// reserved, resolution, format, bytes, width, height, data_bits_per_pixel, padding_bits_per_pixel, framerate, is_valid
 	{MAKE_RESERVED(FREENECT_RESOLUTION_MEDIUM, FREENECT_DEPTH_11BIT), FREENECT_RESOLUTION_MEDIUM, {FREENECT_DEPTH_11BIT}, 640*480*2, 640, 480, 11, 5, 30, 1},
 	{MAKE_RESERVED(FREENECT_RESOLUTION_MEDIUM, FREENECT_DEPTH_10BIT), FREENECT_RESOLUTION_MEDIUM, {FREENECT_DEPTH_10BIT}, 640*480*2, 640, 480, 10, 6, 30, 1},
@@ -69,7 +75,16 @@ static freenect_frame_mode supported_depth_modes[depth_mode_count] = {
 	{MAKE_RESERVED(FREENECT_RESOLUTION_MEDIUM, FREENECT_DEPTH_10BIT_PACKED), FREENECT_RESOLUTION_MEDIUM, {FREENECT_DEPTH_10BIT_PACKED}, 640*480*10/8, 640, 480, 10, 0, 30, 1},
 	{MAKE_RESERVED(FREENECT_RESOLUTION_MEDIUM, FREENECT_DEPTH_REGISTERED), FREENECT_RESOLUTION_MEDIUM, {FREENECT_DEPTH_REGISTERED}, 640*480*2, 640, 480, 16, 0, 30, 1},
 	{MAKE_RESERVED(FREENECT_RESOLUTION_MEDIUM, FREENECT_DEPTH_MM), FREENECT_RESOLUTION_MEDIUM, {FREENECT_DEPTH_MM}, 640*480*2, 640, 480, 16, 0, 30, 1},
+
+	{MAKE_RESERVED(FREENECT_RESOLUTION_LOW, FREENECT_DEPTH_11BIT), FREENECT_RESOLUTION_LOW, {FREENECT_DEPTH_11BIT}, 320*240*2, 320, 240, 11, 5, 30, 1},
+	{MAKE_RESERVED(FREENECT_RESOLUTION_LOW, FREENECT_DEPTH_10BIT), FREENECT_RESOLUTION_LOW, {FREENECT_DEPTH_10BIT}, 320*240*2, 320, 240, 10, 6, 30, 1},
+	{MAKE_RESERVED(FREENECT_RESOLUTION_LOW, FREENECT_DEPTH_11BIT_PACKED), FREENECT_RESOLUTION_LOW, {FREENECT_DEPTH_11BIT_PACKED}, 320*240*11/8, 320, 240, 11, 0, 30, 1},
+	{MAKE_RESERVED(FREENECT_RESOLUTION_LOW, FREENECT_DEPTH_10BIT_PACKED), FREENECT_RESOLUTION_LOW, {FREENECT_DEPTH_10BIT_PACKED}, 320*240*10/8, 320, 240, 10, 0, 30, 1},
+	{MAKE_RESERVED(FREENECT_RESOLUTION_LOW, FREENECT_DEPTH_REGISTERED), FREENECT_RESOLUTION_LOW, {FREENECT_DEPTH_REGISTERED}, 320*240*2, 320, 240, 16, 0, 30, 1},
+	{MAKE_RESERVED(FREENECT_RESOLUTION_LOW, FREENECT_DEPTH_MM), FREENECT_RESOLUTION_LOW, {FREENECT_DEPTH_MM}, 320*240*2, 320, 240, 16, 0, 30, 1},
 };
+#define depth_mode_count (sizeof(supported_depth_modes) / sizeof(supported_depth_modes[0]))
+
 static const freenect_frame_mode invalid_mode = {0, (freenect_resolution)0, {(freenect_video_format)0}, 0, 0, 0, 0, 0, 0, 0};
 
 struct pkt_hdr {
@@ -945,6 +960,8 @@ static int freenect_fetch_zero_plane_info(freenect_device *dev)
 int freenect_start_depth(freenect_device *dev)
 {
 	freenect_context *ctx = dev->parent;
+	uint16_t res_value;
+	uint16_t fps_value;
 	int res;
 
 	if (dev->depth.running)
@@ -973,6 +990,17 @@ int freenect_start_depth(freenect_device *dev)
 			return -1;
 	}
 
+	if(dev->depth_resolution == FREENECT_RESOLUTION_MEDIUM) {
+		res_value = 0x01;
+		fps_value = 0x1e;
+	} else if(dev->depth_resolution == FREENECT_RESOLUTION_LOW) {
+		res_value = 0x00;
+		fps_value = 0x1e;
+	} else {
+		FN_ERROR("freenect_start_depth() called with invalid depth resolution %d\n", dev->depth_resolution);
+		return -1;
+	}
+
 	res = fnusb_start_iso(&dev->usb_cam, &dev->depth_isoc, depth_process, 0x82, NUM_XFERS, PKTS_PER_XFER, DEPTH_PKTBUF);
 	if (res < 0)
 		return res;
@@ -993,8 +1021,9 @@ int freenect_start_depth(freenect_device *dev)
 		case FREENECT_DEPTH_DUMMY: // Returned already, hush gcc
 			break;
 	}
-	write_register(dev, 0x13, 0x01);
-	write_register(dev, 0x14, 0x1e);
+
+	write_register(dev, 0x13, res_value);
+	write_register(dev, 0x14, fps_value);
 	write_register(dev, 0x06, 0x02); // start depth stream
 	write_register(dev, 0x17, 0x00); // disable depth hflip
 
@@ -1030,6 +1059,10 @@ int freenect_start_video(freenect_device *dev)
 				mode_value = 0x00; // Bayer
 				res_value = 0x01; // 640x480
 				fps_value = 0x1e; // 30 Hz
+			} else if(dev->video_resolution == FREENECT_RESOLUTION_LOW) {
+				mode_value = 0x00; // Bayer
+				res_value = 0x00; // 320x240
+				fps_value = 0x1e; // 30 Hz
 			} else {
 				FN_ERROR("freenect_start_video(): called with invalid format/resolution combination\n");
 				return -1;
@@ -1059,9 +1092,13 @@ int freenect_start_video(freenect_device *dev)
 				mode_value = 0x00; // Luminance, 10-bit packed
 				res_value = 0x02; // 1280x1024
 				fps_value = 0x0f; // "15" Hz
-			} else if (dev->video_resolution == FREENECT_RESOLUTION_MEDIUM) {
+			} else if(dev->video_resolution == FREENECT_RESOLUTION_MEDIUM) {
 				mode_value = 0x00; // Luminance, 10-bit packed
 				res_value = 0x01; // 640x480
+				fps_value = 0x1e; // 30 Hz
+			} else if(dev->video_resolution == FREENECT_RESOLUTION_LOW) {
+				mode_value = 0x00; // Luminance, 10-bit packed
+				res_value = 0x00; // 320x240
 				fps_value = 0x1e; // 30 Hz
 			} else {
 				FN_ERROR("freenect_start_video(): called with invalid format/resolution combination\n");
@@ -1077,6 +1114,10 @@ int freenect_start_video(freenect_device *dev)
 			if(dev->video_resolution == FREENECT_RESOLUTION_MEDIUM) {
 				mode_value = 0x05; // UYUV mode
 				res_value = 0x01; // 640x480
+				fps_value = 0x0f; // 15Hz
+			} else if(dev->video_resolution == FREENECT_RESOLUTION_LOW) {
+				mode_value = 0x05; // UYUV mode
+				res_value = 0x00; // 320x240
 				fps_value = 0x0f; // 15Hz
 			} else {
 				FN_ERROR("freenect_start_video(): called with invalid format/resolution combination\n");
