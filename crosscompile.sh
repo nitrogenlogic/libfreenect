@@ -36,14 +36,14 @@ cmake \
 	-D CMAKE_TOOLCHAIN_FILE=${TOOLCHAIN} \
 	-D CMAKE_INSTALL_PREFIX=${PREFIX} \
 	-D CMAKE_BUILD_TYPE=Release \
-	-D LIBUSB_1_INCLUDE_DIR=/home/nitrogen/devel/crosscompile/cross-libs-arm-nofp/usr/include/ \
+	-D LIBUSB_1_INCLUDE_DIR=/home/nitrogen/devel/crosscompile/cross-libs-arm-nofp/usr/include/libusb-1.0 \
 	-D LIBUSB_1_LIBRARY=/home/nitrogen/devel/crosscompile/cross-libs-arm-nofp/usr/lib/libusb-1.0.so \
 	-D BUILD_EXAMPLES=off \
 	"$@" \
 	..
 
-make -j $NCPUS
-make -j $NCPUS install
+make -j $NCPUS $MAKEFLAGS
+make -j $NCPUS $MAKEFLAGS install
 rm -rf ${PREFIX}/include/*libfreenect*
 
 cd ..
@@ -58,11 +58,11 @@ cmake \
 	-D CMAKE_TOOLCHAIN_FILE=${TOOLCHAIN} \
 	-D CMAKE_INSTALL_PREFIX=${LIBS_PREFIX} \
 	-D CMAKE_BUILD_TYPE=Release \
-	-D LIBUSB_1_INCLUDE_DIR=/home/nitrogen/devel/crosscompile/cross-libs-arm-nofp/usr/include/ \
+	-D LIBUSB_1_INCLUDE_DIR=/home/nitrogen/devel/crosscompile/cross-libs-arm-nofp/usr/include/libusb-1.0 \
 	-D LIBUSB_1_LIBRARY=/home/nitrogen/devel/crosscompile/cross-libs-arm-nofp/usr/lib/libusb-1.0.so \
 	-D BUILD_EXAMPLES=off \
 	"$@" \
 	..
 
-make -j $NCPUS
-make -j $NCPUS install
+make -j $NCPUS $MAKEFLAGS
+make -j $NCPUS $MAKEFLAGS install
