@@ -121,7 +121,6 @@ FN_INTERNAL int fnusb_init(fnusb_ctx *ctx, freenect_usb_context *usb_ctx)
 	int res;
 	if (!usb_ctx) {
 		res = libusb_init(&ctx->ctx);
-		libusb_set_debug(ctx->ctx, 3);
 		if (res >= 0) {
 			ctx->should_free_ctx = 1;
 			return 0;
