@@ -25,7 +25,6 @@
  */
 
 #include <stdio.h>
-#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -189,7 +188,7 @@ FN_INTERNAL int fnusb_open_subdevices(freenect_device *dev, int index)
 
 		if (desc.idVendor != VID_MICROSOFT)
 			continue;
-
+		res = 0;
 		// Search for the camera
 		if ((ctx->enabled_subdevices & FREENECT_DEVICE_CAMERA) && !dev->usb_cam.dev && (desc.idProduct == PID_NUI_CAMERA || desc.idProduct == PID_K4W_CAMERA)) {
 			// If the index given by the user matches our camera index
@@ -200,6 +199,15 @@ FN_INTERNAL int fnusb_open_subdevices(freenect_device *dev, int index)
 					dev->usb_cam.dev = NULL;
 					break;
 				}
+				if(desc.idProduct == PID_K4W_CAMERA || desc.bcdDevice != fn_le32(267)){
+					/* Not the old kinect so we only set up the camera*/ 
+					ctx->enabled_subdevices = FREENECT_DEVICE_CAMERA;
+					ctx->zero_plane_res = 334;
+				}else{
+					/* The good old kinect that tilts and tweets */
+					ctx->zero_plane_res = 322;
+				}
+				
 #ifndef _WIN32
 				// Detach an existing kernel driver for the device
 				res = libusb_kernel_driver_active(dev->usb_cam.dev, 0);
@@ -220,30 +228,33 @@ FN_INTERNAL int fnusb_open_subdevices(freenect_device *dev, int index)
 					dev->usb_cam.dev = NULL;
 					break;
 				}
-				if (desc.idProduct == PID_NUI_CAMERA) {
-					dev->hwrev = HWREV_XBOX360_0;
-					FN_SPEW("Opened Kinect for Xbox360 camera\n");
-				} else if (desc.idProduct == PID_K4W_CAMERA) {
-					dev->hwrev = HWREV_K4W_0;
-					FN_SPEW("Opened Kinect for Windows camera\n");
-					// Set alternate interface setting 1 to enable the two isochronous endpoints
+				if(desc.idProduct == PID_K4W_CAMERA){
 					res = libusb_set_interface_alt_setting(dev->usb_cam.dev, 0, 1);
-					if (res != 0) {
-						FN_ERROR("Failed to set alternate interface #1 for K4W: %d\n", res);
-						libusb_close(dev->usb_cam.dev);
-						dev->usb_cam.dev = NULL;
-						break;
-					}
-				} else {
-					FN_ERROR("Unknown hardware revision - fix fnusb_open_subdevices()\n");
+         				if (res != 0) {
+           					FN_ERROR("Failed to set alternate interface #1 for K4W: %d\n", res);
+           					libusb_close(dev->usb_cam.dev);
+          					dev->usb_cam.dev = NULL;
+           					break;
+          				}
 				}
 			} else {
 				nr_cam++;
 			}
 		}
-
+	}
+	
+	if(ctx->enabled_subdevices == FREENECT_DEVICE_CAMERA || res < 0) cnt = 0;
+	
 		// Search for the motor
-		if ((ctx->enabled_subdevices & FREENECT_DEVICE_MOTOR) && !dev->usb_motor.dev && (desc.idProduct == PID_NUI_MOTOR)) {
+	
+	for (i = 0; i < cnt; i++) {
+		int r = libusb_get_device_descriptor (devs[i], &desc);
+		if (r < 0)
+			continue;
+
+		if (desc.idVendor != VID_MICROSOFT)
+			continue;
+		if ((ctx->enabled_subdevices & FREENECT_DEVICE_MOTOR) && !dev->usb_motor.dev && desc.idProduct == PID_NUI_MOTOR) {
 			// If the index given by the user matches our camera index
 			if (nr_mot == index) {
 				res = libusb_open (devs[i], &dev->usb_motor.dev);
