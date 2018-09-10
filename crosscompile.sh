@@ -23,7 +23,7 @@ CROSS_BASE=${HOME}/devel/crosscompile
 
 case "$1" in
 	neon)
-	TOOLCHAIN=${BASEDIR}/cross_toolchain/cmake-toolchain-arm-linux-neon.cmake
+	TOOLCHAIN=${BASEDIR}/cmake_toolchain/cmake-toolchain-arm-linux-neon.cmake
 	PREFIX=${CROSS_BASE}/cross-root-arm-neon-depth/usr/local
 	LIBS_PREFIX=${CROSS_BASE}/cross-libs-arm-neon/usr/local
 	DEBIAN_ROOT=${CROSS_BASE}/debian-squeeze-root-armel-build
@@ -31,7 +31,7 @@ case "$1" in
 	;;
 
 	nofp)
-	TOOLCHAIN=${BASEDIR}/cross_toolchain/cmake-toolchain-arm-linux-nofp.cmake
+	TOOLCHAIN=${BASEDIR}/cmake_toolchain/cmake-toolchain-arm-linux-nofp.cmake
 	PREFIX=${CROSS_BASE}/cross-root-arm-nofp-depth/usr/local
 	LIBS_PREFIX=${CROSS_BASE}/cross-libs-arm-nofp/usr/local
 	DEBIAN_ROOT=${CROSS_BASE}/debian-squeeze-root-armel-build
