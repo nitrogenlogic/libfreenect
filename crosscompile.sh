@@ -1,19 +1,32 @@
 #!/bin/bash
 
+BASEDIR="$(readlink -m "$(dirname "$0")")"
 NCPUS=$(grep -i 'processor.*:' /proc/cpuinfo | wc -l)
+
+CROSS_BASE=${HOME}/devel/crosscompile
+
+# TODO: Use nlutils cross-compilation toolchains, once the following errors are figured out:
+# /crosscompile/debian-squeeze-root-armel-build/lib/libpthread.so.0: undefined reference to `h_errno@GLIBC_PRIVATE'
+# /crosscompile/debian-squeeze-root-armel-build/lib/libpthread.so.0: undefined reference to `__libc_dl_error_tsd@GLIBC_PRIVATE'
+# /crosscompile/debian-squeeze-root-armel-build/lib/libpthread.so.0: undefined reference to `__default_sa_restorer_v2@GLIBC_PRIVATE'
+# /crosscompile/debian-squeeze-root-armel-build/lib/libpthread.so.0: undefined reference to `__default_rt_sa_restorer_v2@GLIBC_PRIVATE'
+#
+# Seems related to using system ARM GCC 7 to compile
 
 case "$1" in
 	neon)
-	TOOLCHAIN=${HOME}/devel/crosscompile/cmake-toolchain-arm-linux-neon.cmake
-	PREFIX=${HOME}/devel/crosscompile/cross-root-arm-neon-depth/usr/local
-	LIBS_PREFIX=${HOME}/devel/crosscompile/cross-libs-arm-neon/usr/local
+	TOOLCHAIN=${BASEDIR}/cross_toolchain/cmake-toolchain-arm-linux-neon.cmake
+	PREFIX=${CROSS_BASE}/cross-root-arm-neon-depth/usr/local
+	LIBS_PREFIX=${CROSS_BASE}/cross-libs-arm-neon/usr/local
+	DEBIAN_ROOT=${CROSS_BASE}/debian-squeeze-root-armel-build
 	ARCH=armv7l
 	;;
 
 	nofp)
-	TOOLCHAIN=${HOME}/devel/crosscompile/cmake-toolchain-arm-linux-nofp.cmake
-	PREFIX=${HOME}/devel/crosscompile/cross-root-arm-nofp-depth/usr/local
-	LIBS_PREFIX=${HOME}/devel/crosscompile/cross-libs-arm-nofp/usr/local
+	TOOLCHAIN=${BASEDIR}/cross_toolchain/cmake-toolchain-arm-linux-nofp.cmake
+	PREFIX=${CROSS_BASE}/cross-root-arm-nofp-depth/usr/local
+	LIBS_PREFIX=${CROSS_BASE}/cross-libs-arm-nofp/usr/local
+	DEBIAN_ROOT=${CROSS_BASE}/debian-squeeze-root-armel-build
 	ARCH=armv5tel
 	;;
 
@@ -36,8 +49,8 @@ cmake \
 	-D CMAKE_TOOLCHAIN_FILE=${TOOLCHAIN} \
 	-D CMAKE_INSTALL_PREFIX=${PREFIX} \
 	-D CMAKE_BUILD_TYPE=Release \
-	-D LIBUSB_1_INCLUDE_DIR=/home/nitrogen/devel/crosscompile/cross-libs-arm-nofp/usr/include/libusb-1.0 \
-	-D LIBUSB_1_LIBRARY=/home/nitrogen/devel/crosscompile/cross-libs-arm-nofp/usr/lib/libusb-1.0.so \
+	-D LIBUSB_1_INCLUDE_DIR=${DEBIAN_ROOT}/usr/include/libusb-1.0 \
+	-D LIBUSB_1_LIBRARY=${DEBIAN_ROOT}/lib/libusb-1.0.so.0 \
 	-D BUILD_EXAMPLES=off \
 	"$@" \
 	..
@@ -58,8 +71,8 @@ cmake \
 	-D CMAKE_TOOLCHAIN_FILE=${TOOLCHAIN} \
 	-D CMAKE_INSTALL_PREFIX=${LIBS_PREFIX} \
 	-D CMAKE_BUILD_TYPE=Release \
-	-D LIBUSB_1_INCLUDE_DIR=/home/nitrogen/devel/crosscompile/cross-libs-arm-nofp/usr/include/libusb-1.0 \
-	-D LIBUSB_1_LIBRARY=/home/nitrogen/devel/crosscompile/cross-libs-arm-nofp/usr/lib/libusb-1.0.so \
+	-D LIBUSB_1_INCLUDE_DIR=${DEBIAN_ROOT}/usr/include/libusb-1.0 \
+	-D LIBUSB_1_LIBRARY=${DEBIAN_ROOT}/lib/libusb-1.0.so.0 \
 	-D BUILD_EXAMPLES=off \
 	"$@" \
 	..
