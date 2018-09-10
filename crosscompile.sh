@@ -1,4 +1,11 @@
 #!/bin/bash
+# Cross-compilation script for libfreenect for Nitrogen Logic controllers
+# Copyright (C)2012, 2018 Mike Bourgeous
+#
+# Requires CodeSourcery G++ Lite 4.x for ARM in the home directory
+#
+# TODO: document build paths, rationale, and interaction with other Nitrogen
+# Logic repos
 
 BASEDIR="$(readlink -m "$(dirname "$0")")"
 NCPUS=$(grep -i 'processor.*:' /proc/cpuinfo | wc -l)
@@ -11,7 +18,8 @@ CROSS_BASE=${HOME}/devel/crosscompile
 # /crosscompile/debian-squeeze-root-armel-build/lib/libpthread.so.0: undefined reference to `__default_sa_restorer_v2@GLIBC_PRIVATE'
 # /crosscompile/debian-squeeze-root-armel-build/lib/libpthread.so.0: undefined reference to `__default_rt_sa_restorer_v2@GLIBC_PRIVATE'
 #
-# Seems related to using system ARM GCC 7 to compile
+# Seems related to using system ARM GCC 7 to compile; solution might be to use
+# nlutils cross-root scripts
 
 case "$1" in
 	neon)

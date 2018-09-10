@@ -1,3 +1,10 @@
+= Cross-compilation fork of libfreenect for Nitrogen Logic
+
+See `crosscompile.sh` for more info.
+
+TODO: Document cross-compilation better
+
+
 == libfreenect
 
 Ongoing Development and Maintenance by the OpenKinect Community
