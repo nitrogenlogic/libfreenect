@@ -87,3 +87,28 @@ cmake \
 
 make -j $NCPUS $MAKEFLAGS
 make -j $NCPUS $MAKEFLAGS install
+
+cd ..
+
+# TODO: Better would be to build and install a package
+printf "\n\n====== Compiling/installing library+headers to cross-build Debian chroot ======\n\n"
+# Install libs and headers for local compilation
+rm -rf build-$ARCH-root
+mkdir build-$ARCH-root
+cd build-$ARCH-root
+
+cmake \
+	-D CMAKE_TOOLCHAIN_FILE=${TOOLCHAIN} \
+	-D CMAKE_INSTALL_PREFIX=${DEBIAN_ROOT}/usr/local \
+	-D CMAKE_BUILD_TYPE=Release \
+	-D LIBUSB_1_INCLUDE_DIR=${DEBIAN_ROOT}/usr/include/libusb-1.0 \
+	-D LIBUSB_1_LIBRARY=${DEBIAN_ROOT}/lib/libusb-1.0.so.0 \
+	-D BUILD_EXAMPLES=off \
+	"$@" \
+	..
+
+make -j $NCPUS $MAKEFLAGS
+echo "Running sudo to install to chroot"
+sudo make -j $NCPUS $MAKEFLAGS install
+
+cd ..
