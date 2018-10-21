@@ -1,6 +1,7 @@
 = Cross-compilation fork of libfreenect for Nitrogen Logic
 
-See `crosscompile.sh` for more info.
+Run full cross-compilation of `nlutils` first, followed by `ARCH=armel TESTS=0
+meta/cross_pkg.sh` in `nlutils`.  See `crosscompile.sh` for more info.
 
 TODO: Document cross-compilation better
 
